@@ -1,0 +1,68 @@
+package com.klef.dev.controller;
+
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import com.klef.dev.entity.Driver;
+import com.klef.dev.service.DriverService;
+
+@RestController
+@RequestMapping("/f1api")
+@CrossOrigin(origins = "*")
+public class RaceController {
+
+    @Autowired
+    private DriverService driverService;
+    
+    @GetMapping("/")
+    public String home() {
+        return "F1 Race Full Stack Deployment Demo";
+    }
+
+    @PostMapping("/add-driver")
+    public ResponseEntity<Driver> addDriver(@RequestBody Driver driver) {
+        Driver savedDriver = driverService.addDriver(driver);
+        return new ResponseEntity<>(savedDriver, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/drivers")
+    public ResponseEntity<List<Driver>> getAllDrivers() {
+        List<Driver> drivers = driverService.getAllDrivers();
+        return new ResponseEntity<>(drivers, HttpStatus.OK);
+    }
+
+    @GetMapping("/driver/{id}")
+    public ResponseEntity<?> getDriverById(@PathVariable int id) {
+        Driver driver = driverService.getDriverById(id);
+        if (driver != null) {
+            return new ResponseEntity<>(driver, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Driver with ID " + id + " not found.", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/update-driver")
+    public ResponseEntity<?> updateDriver(@RequestBody Driver driver) {
+        Driver existing = driverService.getDriverById(driver.getId());
+        if (existing != null) {
+            Driver updatedDriver = driverService.updateDriver(driver);
+            return new ResponseEntity<>(updatedDriver, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Cannot update. Driver with ID " + driver.getId() + " not found.", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/delete-driver/{id}")
+    public ResponseEntity<String> deleteDriver(@PathVariable int id) {
+        Driver existing = driverService.getDriverById(id);
+        if (existing != null) {
+            driverService.deleteDriverById(id);
+            return new ResponseEntity<>("Driver with ID " + id + " deleted successfully.", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Cannot delete. Driver with ID " + id + " not found.", HttpStatus.NOT_FOUND);
+        }
+    }
+}
